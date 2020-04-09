@@ -60,6 +60,18 @@ impl Add for &Vec3 {
     }
 }
 
+impl Sub for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Vec3::new(
+            self.e[0] - other.e[0],
+            self.e[1] - other.e[1],
+            self.e[2] - other.e[2]
+        )
+    }
+}
+
 impl AddAssign for Vec3 {
     fn add_assign(&mut self, other: Self) {
         *self = Self {
@@ -118,4 +130,8 @@ impl Div<f32> for &Vec3 {
             self.e[2] / rhs
         ] }
     }
+}
+
+pub fn dot(v1: &Vec3, v2: &Vec3) -> f32 {
+    (v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2])
 }

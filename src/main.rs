@@ -3,10 +3,22 @@ use std::io::Write;
 
 mod vec;
 mod ray;
-use crate::vec::Vec3;
+use crate::vec::{Vec3, dot};
 use crate::ray::Ray;
 
+fn hit_sphere(center: &Vec3, radius: f32, r: &Ray) -> bool {
+    let oc = &r.origin - &center;
+    let a = dot(&r.direction, &r.direction);
+    let b = 2.0 * dot(&oc, &r.direction);
+    let c = dot(&oc, &oc) - radius*radius;
+    let discriminant = b*b - 4_f32*a*c;
+    (discriminant > 0_f32)
+}
+
 fn color(r: &Ray) -> Vec3 {
+    if hit_sphere(&Vec3::new(0.0, 0.0, -1.0), 0.5, r) {
+        return Vec3::new(1.0, 0.0, 0.0);
+    }
     let unit_direction: Vec3 = r.direction.unit_vector();
     let t: f32 = 0.5 * (unit_direction.y() + 1.0);
     &((1.0_f32 - t) * &Vec3::new(1.0, 1.0, 1.0)) + &(t * &Vec3::new(0.5, 0.7, 1.0))
