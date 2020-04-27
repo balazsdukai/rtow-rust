@@ -12,16 +12,33 @@ use crate::ray::Ray;
 use crate::hitable::{Sphere, HitRecord, Hitable, HitableList};
 use crate::camera::Camera;
 
+fn random_in_unit_sphere() -> Vec3 {
+    // Rejection method algorithm for picking a random point in a unit radius sphere centered
+    // at the origin. Diffuse materials have a random reflection.
+    let mut p = Vec3::new(1.0, 1.0, 1.0);
+    let mut rng = rand::thread_rng();
+    // Try if the point is outside the sphere
+    while { p.squared_length() >= 1.0 } {
+        // Pick a random point in the unit cube where x,y,z range from -1 to +1
+        let pt_in_unit_cube = Vec3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>());
+        p = &(2.0 * &pt_in_unit_cube) - &Vec3::new(1.0, 1.0, 1.0);
+    }
+    p
+}
+
 fn color(r: &Ray, world: &HitableList) -> Vec3 {
-    if let Some(hit_record) = world.hit(r, 0.0, MAX) {
+    if let Some(hit_record) = world.hit(r, 0.001, MAX) {
         if hit_record.on_edge {
             // we are hitting the visible edge of the sphere, so paint it red
             return Vec3::new(1.0, 0.0, 0.0);
         }
         else {
-            return 0.5 * &Vec3::new(hit_record.normal.x()+1.0,
-                                    hit_record.normal.y()+1.0,
-                                    hit_record.normal.z()+1.0);
+            // Center of unit radius sphere that is tangent to the hitpoint
+            let unit_center: &Vec3 = &(&hit_record.p + &hit_record.normal);
+            let target: Vec3 = unit_center + &random_in_unit_sphere();
+            // Diffuse material: pick a random point from the unit radius sphere that is tangent to
+            // the hitpoint, and send a ray from the hitpoint 'p' to the random point.
+            return 0.5 * &color( &Ray{origin:hit_record.p, direction: &target-&hit_record.p }, world);
         }
     }
     else {
@@ -64,6 +81,8 @@ fn main() -> std::io::Result<()> {
                 col += color(&r, &world);
             }
             col = &col / ns as f32;
+            // Apply 'gamma 2' correction --> raise the color to the power of 1/gamma
+            col = Vec3::new(col.e[0].sqrt(), col.e[1].sqrt(), col.e[2].sqrt());
             let ir: i16 = (255.99 * col.e[0]) as i16;
             let ig: i16 = (255.99 * col.e[1]) as i16;
             let ib: i16 = (255.99 * col.e[2]) as i16;
