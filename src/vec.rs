@@ -88,6 +88,18 @@ impl AddAssign for Vec3 {
     }
 }
 
+impl Mul for &Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Vec3 { e: [
+            self.e[0] * rhs.e[0],
+            self.e[1] * rhs.e[1],
+            self.e[2] * rhs.e[2]
+        ] }
+    }
+}
+
 impl Mul<f32> for &Vec3 {
     type Output = Vec3;
 
