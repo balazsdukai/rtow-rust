@@ -39,8 +39,8 @@ fn main() -> std::io::Result<()> {
         .create(true)
         .append(true)
         .open("basic.ppm")?;
-    let nx: i16 = 800;
-    let ny: i16 = 400;
+    let nx: i16 = 200;
+    let ny: i16 = 100;
     let ns: i16 = 100;
 
     f.write_all("P3\n".as_bytes());
@@ -70,9 +70,8 @@ fn main() -> std::io::Result<()> {
             Box::new(Sphere {
                 center: Vec3::new(-1.0, 0.0, -1.0),
                 radius: 0.5,
-                material: Material::Metal {
-                    albedo: Vec3::new(0.8, 0.8, 0.8),
-                    fuzz: 0.1
+                material: Material::Dielectric {
+                    refractive_idx: 1.5
                 }
             })
         ]

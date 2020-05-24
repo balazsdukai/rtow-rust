@@ -13,6 +13,9 @@ pub enum Material {
     Metal {
         albedo: Vec3,
         fuzz: f32
+    },
+    Dielectric {
+        refractive_idx: f32
     }
 }
 
@@ -36,6 +39,32 @@ pub fn scatter(material: &Material, ray_in: &Ray, hit_record: &HitRecord) -> (Ve
             let should_scatter = dot(&scattered_ray.direction, &hit_record.normal) > 0.0;
             (attenuation, scattered_ray, should_scatter)
         }
+        Material::Dielectric {refractive_idx} => {
+            let reflected: Vec3 = reflect(&ray_in.direction, &hit_record.normal);
+            let attenuation = Vec3::new(1.0, 1.0, 1.0);
+            let direction_dot_normal: f32 = dot(&ray_in.direction, &hit_record.normal);
+            let (outward_normal, ni_over_nt, cosine) = if direction_dot_normal > 0.0 {
+                let rev = Vec3::new(-hit_record.normal.e[0], -hit_record.normal.e[1], -hit_record.normal.e[2]);
+                (rev, refractive_idx, refractive_idx * direction_dot_normal / ray_in.direction.length())
+            } else {
+                (hit_record.normal, 1.0 / refractive_idx, -direction_dot_normal / ray_in.direction.length())
+            };
+
+            let (refracted, should_refract) = refract(&ray_in.direction, &outward_normal, ni_over_nt);
+
+            let reflect_prob = if should_refract {
+                schlick(cosine, refractive_idx)
+            } else {
+                1.0
+            };
+
+            let mut rng = rand::thread_rng();
+            if rng.gen::<f32>() < reflect_prob {
+                (attenuation, Ray { origin: hit_record.p, direction: reflected}, true)
+            } else {
+                (attenuation, Ray { origin: hit_record.p, direction: refracted}, true)
+            }
+        }
     }
 }
 
@@ -55,4 +84,21 @@ fn random_in_unit_sphere() -> Vec3 {
 
 fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     v - &(2.0 * dot(v, n) * n)
+}
+
+fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f32) -> (Vec3, bool) {
+    let uv = v.unit_vector();
+    let dt = dot(&uv,n);
+    let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
+    if discriminant > 0.0 {
+        (&(ni_over_nt * &(&uv - &(n * dt))) - &(n * discriminant.sqrt()), true)
+    } else {
+        (Vec3::new(0.0, 0.0, 0.0), false)
+    }
+}
+
+fn schlick(cosine: f32, refractive_idx: f32) -> f32 {
+    let mut r0 = (1.0 - refractive_idx) / (1.0 + refractive_idx);
+    r0 = r0 * r0;
+    r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
 }
