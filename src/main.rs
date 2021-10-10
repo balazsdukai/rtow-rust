@@ -65,7 +65,7 @@ fn main() -> std::io::Result<()> {
     };
 
     // Camera
-    let cam = Camera::new();
+    let cam = Camera::new(1.0, 1.0);
 
     // Render
     let mut f = OpenOptions::new()
