@@ -9,7 +9,7 @@ pub mod hitable;
 pub mod camera;
 pub mod material;
 
-use crate::vec::{Vec3};
+use crate::vec::{Point3, Vec3};
 use crate::ray::Ray;
 use crate::hitable::{Sphere, Hitable, HitableList};
 use crate::camera::Camera;
@@ -33,6 +33,41 @@ fn color(ray_in: &Ray, world: &HitableList, depth: i32) -> Vec3 {
 }
 
 fn main() -> std::io::Result<()> {
+    // World
+    let world = HitableList {
+        list: vec![
+            Box::new(Sphere {
+                center: Point3::new(0.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) }
+            }),
+            Box::new(Sphere {
+                center: Point3::new(0.0, -100.5, -1.0),
+                radius: 100.0,
+                material: Material::Lambertian { albedo: Vec3::new(0.8, 0.8, 0.0) }
+            }),
+            Box::new(Sphere {
+                center: Point3::new(1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: Vec3::new(0.8, 0.6, 0.2),
+                    fuzz: 0.3
+                }
+            }),
+            Box::new(Sphere {
+                center: Point3::new(-1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Dielectric {
+                    refractive_idx: 1.5
+                }
+            })
+        ]
+    };
+
+    // Camera
+    let cam = Camera::new();
+
+    // Render
     let mut f = OpenOptions::new()
         .read(true)
         .write(true)
@@ -46,37 +81,6 @@ fn main() -> std::io::Result<()> {
     let _ = f.write_all("P3\n".as_bytes());
     let _ = f.write_all((format!("{} {}\n", image_width, image_height)).as_bytes());
     let _ = f.write_all((format!("255\n")).as_bytes());
-
-    let world = HitableList {
-        list: vec![
-            Box::new(Sphere {
-                center: Vec3::new(0.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Lambertian { albedo: Vec3::new(0.8, 0.3, 0.3) }
-            }),
-            Box::new(Sphere {
-                center: Vec3::new(0.0, -100.5, -1.0),
-                radius: 100.0,
-                material: Material::Lambertian { albedo: Vec3::new(0.8, 0.8, 0.0) }
-            }),
-            Box::new(Sphere {
-                center: Vec3::new(1.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Metal {
-                    albedo: Vec3::new(0.8, 0.6, 0.2),
-                    fuzz: 0.3
-                }
-            }),
-            Box::new(Sphere {
-                center: Vec3::new(-1.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Dielectric {
-                    refractive_idx: 1.5
-                }
-            })
-        ]
-    };
-    let cam = Camera::new();
 
     let mut rng = rand::thread_rng();
     for j in (0..image_height).rev() {
