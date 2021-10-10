@@ -70,7 +70,13 @@ fn main() -> std::io::Result<()> {
     let image_height: i16 = (image_width as f32 / aspect_ratio) as i16;
 
     // Camera
-    let cam = Camera::new(60.0, aspect_ratio);
+    let cam = Camera::new(
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio
+    );
 
     // Render
     let filename = "basic.ppm";
