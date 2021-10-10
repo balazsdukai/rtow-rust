@@ -74,7 +74,7 @@ fn random_in_unit_sphere() -> Vec3 {
     let mut p = Vec3::new(1.0, 1.0, 1.0);
     let mut rng = rand::thread_rng();
     // Try if the point is outside the sphere
-    while { p.squared_length() >= 1.0 } {
+    while p.squared_length() >= 1.0 {
         // Pick a random point in the unit cube where x,y,z range from -1 to +1
         let pt_in_unit_cube = Vec3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>());
         p = &(2.0 * &pt_in_unit_cube) - &Vec3::new(1.0, 1.0, 1.0);
