@@ -64,7 +64,31 @@ impl Add for &Vec3 {
     }
 }
 
+impl Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, other: Self) -> Self::Output {
+        Vec3::new(
+            self.e[0] + other.e[0],
+            self.e[1] + other.e[1],
+            self.e[2] + other.e[2]
+        )
+    }
+}
+
 impl Sub for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Vec3::new(
+            self.e[0] - other.e[0],
+            self.e[1] - other.e[1],
+            self.e[2] - other.e[2]
+        )
+    }
+}
+
+impl Sub for Vec3 {
     type Output = Vec3;
 
     fn sub(self, other: Self) -> Self::Output {
@@ -124,6 +148,18 @@ impl Mul<&Vec3> for f32 {
     }
 }
 
+impl Mul<Vec3> for f32 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3 { e: [
+            self * rhs.e[0],
+            self * rhs.e[1],
+            self * rhs.e[2]
+        ] }
+    }
+}
+
 impl Div for Vec3 {
     type Output = Self;
 
@@ -144,6 +180,30 @@ impl Div<f32> for &Vec3 {
             self.e[0] / rhs,
             self.e[1] / rhs,
             self.e[2] / rhs
+        ] }
+    }
+}
+
+impl Div<f32> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        Vec3 { e: [
+            self.e[0] / rhs,
+            self.e[1] / rhs,
+            self.e[2] / rhs
+        ] }
+    }
+}
+
+impl Div<&Vec3> for f32 {
+    type Output = Vec3;
+
+    fn div(self, rhs: &Vec3) -> Self::Output {
+        Vec3 { e: [
+            self / rhs.e[0],
+            self / rhs.e[1],
+            self / rhs.e[2]
         ] }
     }
 }

@@ -1,6 +1,6 @@
-use std::fs::OpenOptions;
+use std::fs::{OpenOptions, remove_file};
+use std::path::Path;
 use std::io::Write;
-use std::f32::MAX;
 use rand::prelude::*;
 
 pub mod vec;
@@ -17,7 +17,7 @@ use crate::material::Material;
 
 
 fn color(ray_in: &Ray, world: &HitableList, depth: i32) -> Vec3 {
-    if let Some(hit_record) = world.hit(ray_in, 0.001, MAX) {
+    if let Some(hit_record) = world.hit(ray_in, 0.001, f32::MAX) {
         if depth < 50 {
             let (attenuation, scattered_ray, should_scatter) = material::scatter(&hit_record.material, ray_in, &hit_record);
             if should_scatter {
@@ -64,19 +64,26 @@ fn main() -> std::io::Result<()> {
         ]
     };
 
+    // Image
+    let aspect_ratio: f32 = 16.0 / 9.0;
+    let image_width: i16 = 400;
+    let image_height: i16 = (image_width as f32 / aspect_ratio) as i16;
+
     // Camera
-    let cam = Camera::new(1.0, 1.0);
+    let cam = Camera::new(60.0, aspect_ratio);
 
     // Render
+    let filename = "basic.ppm";
+    if Path::new(filename).exists() {
+        remove_file(filename)?;
+    }
     let mut f = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
         .append(true)
-        .open("basic.ppm")?;
-    let image_width: i16 = 200;
-    let image_height: i16 = 100;
-    let ns: i16 = 100;
+        .open(filename)?;
+    let ns: i16 = 10;
 
     let _ = f.write_all("P3\n".as_bytes());
     let _ = f.write_all((format!("{} {}\n", image_width, image_height)).as_bytes());
