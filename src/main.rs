@@ -70,13 +70,12 @@ fn main() -> std::io::Result<()> {
     let image_height: i16 = (image_width as f32 / aspect_ratio) as i16;
 
     // Camera
-    let cam = Camera::new(
-        Point3::new(-2.0, 2.0, 1.0),
-        Point3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 1.0, 0.0),
-        20.0,
-        aspect_ratio
-    );
+    let lookfrom = Point3::new(3.0, 3.0, 2.0);
+    let lookat = Point3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let aperture: f32 = 2.0;
+    let dist_to_focus = (lookfrom - lookat).length();
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
     // Render
     let filename = "basic.ppm";
@@ -104,7 +103,7 @@ fn main() -> std::io::Result<()> {
             for _ in 0..ns {
                 let u = (i as f32 + rng.gen::<f32>()) / image_width as f32;
                 let v = (j as f32 + rng.gen::<f32>()) / image_height as f32;
-                let r = cam.get_ray(u, v);
+                let r = cam.get_ray(u, v, &mut rng);
                 col += color(&r, &world, 0);
             }
             // Now take the average of the color samples inside the pixel.

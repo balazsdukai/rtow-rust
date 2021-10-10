@@ -1,4 +1,6 @@
 use std::ops::{Add, AddAssign, Sub, Mul, Div};
+use rand::prelude::ThreadRng;
+use rand::Rng;
 
 
 // Vec3
@@ -124,7 +126,31 @@ impl Mul for &Vec3 {
     }
 }
 
+impl Mul for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Vec3 { e: [
+            self.e[0] * rhs.e[0],
+            self.e[1] * rhs.e[1],
+            self.e[2] * rhs.e[2]
+        ] }
+    }
+}
+
 impl Mul<f32> for &Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Vec3 { e: [
+            self.e[0] * rhs,
+            self.e[1] * rhs,
+            self.e[2] * rhs
+        ] }
+    }
+}
+
+impl Mul<f32> for Vec3 {
     type Output = Vec3;
 
     fn mul(self, rhs: f32) -> Self::Output {
@@ -218,6 +244,18 @@ pub fn cross(v1: &Vec3, v2: &Vec3) -> Vec3 {
         v1.e[2] * v2.e[0] - v1.e[0] * v2.e[2],
         v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]
     )
+}
+
+pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Vec3 {
+    loop {
+        let p = Vec3::new(
+            rng.gen_range(-1.0..1.0),
+            rng.gen_range(-1.0..1.0),
+            0.0,
+        );
+        if p.squared_length() >= 1.0 { continue; }
+        else { break p; };
+    }
 }
 
 pub type Point3 = Vec3;
