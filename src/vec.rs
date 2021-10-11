@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Sub, Mul, Div};
 use rand::prelude::ThreadRng;
-use rand::Rng;
+use rand::{random, Rng, thread_rng};
 
 
 // Vec3
@@ -50,6 +50,15 @@ impl Vec3 {
 
     pub fn unit_vector(&self) -> Vec3 {
         self / self.length()
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3::new(random(), random(), random())
+    }
+
+    pub fn random_range(min: f32, max: f32) -> Vec3 {
+        let mut rng = thread_rng();
+        Vec3::new(rng.gen_range(min..max), rng.gen_range(min..max), rng.gen_range(min..max))
     }
 
 }
